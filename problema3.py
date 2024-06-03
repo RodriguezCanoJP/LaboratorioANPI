@@ -1,7 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import PIL
-import time
 import os
 import glob
 
@@ -49,7 +48,7 @@ def show_face(face_image):
     plt.imshow(image, cmap="gray")
     plt.axis("off")
 
-def best_coordinate(face_sample, m=m, x=x):
+def best_coordinate(face_sample, m, x):
     """
     @params
     face_sample: matriz de rostro con los valores del rostro promedio restado
@@ -61,7 +60,7 @@ def best_coordinate(face_sample, m=m, x=x):
         err[i]=np.linalg.norm(face_sample - x[:,i].reshape(-1,1))
     return np.where(err == err.min())[0]
 
-def resultados(n, train_mat, compare_mat, singular_matrix, r):
+def resultados(n, train_mat, compare_mat, singular_matrix, m, r):
     """
     @params
     n: valor entre 0 y 39, rostro de comparacion
@@ -72,6 +71,8 @@ def resultados(n, train_mat, compare_mat, singular_matrix, r):
     
     Grafica el rostro a comparar y el rosto que se identifica
     """
+    #Vectores de coordenadas x
+    x = U[:,:r].T@A_train
     x_sample = singular_matrix[:,:r].T @ compare_mat[:,n].reshape(-1,1)
     plt.clf()
     plt.subplot(1,2,1)
@@ -79,7 +80,7 @@ def resultados(n, train_mat, compare_mat, singular_matrix, r):
     plt.title("Rostro Nuevo")
     plt.subplot(1,2,2)
     plt.title("Rostro Identificado")
-    show_face(train_mat[:,best_coordinate(x_sample)])
+    show_face(train_mat[:,best_coordinate(x_sample, r, x)])
     plt.show()
 
 
@@ -96,7 +97,6 @@ U, S, V = np.linalg.svd(A_train)
 m = len(S)
 r = len((S > m * 2.2e-16 * S[0]))
 
-#Vectores de coordenadas x
-x = U[:,:r].T@A_train
 
-resultados(29, A_train, A_compare, U, r)
+
+resultados(29, A_train, A_compare, U, m, r)
